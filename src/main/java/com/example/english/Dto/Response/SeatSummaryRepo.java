@@ -1,0 +1,17 @@
+package com.example.english.Dto.Response;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class SeatSummaryRepo {
+    Long id;
+    String seatTypeName;
+    Long seatTypeId;
+    String seatCode;
+}
