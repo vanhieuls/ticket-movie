@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -33,6 +35,8 @@ public class Movie extends BaseEntity {
     boolean status;
     LocalDate releaseDate;
     LocalDate endDate;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    Set<ShowTime> showTimes;
 
 
 }

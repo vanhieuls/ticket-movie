@@ -1,10 +1,16 @@
 package com.example.english.Service.Interface;
 
+import com.example.english.Dto.Request.FilterMovie;
 import com.example.english.Dto.Request.MovieRequest;
 import com.example.english.Dto.Response.MovieDetailResponse;
+import com.example.english.Dto.Response.MovieResponse;
 import com.example.english.Dto.Response.MovieSummaryResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface MovieService {
@@ -16,5 +22,9 @@ public interface MovieService {
     List<MovieSummaryResponse> getAllMovies();
     List<MovieSummaryResponse> getNowPlayingMovies();
     List<MovieSummaryResponse> getUpcomingMovies();
-
+    List<String> getListCinemaAddress(FilterMovie filterMovie);
+    Page<MovieSummaryResponse> getFilterMovie (Integer pageNumber, Integer pageSize,String category, String brand, String properties,String sortDir,
+                                       BigDecimal minPrice,
+                                       BigDecimal maxPrice);
+    List<MovieResponse> getMovieShowDay(LocalDate date);
 }

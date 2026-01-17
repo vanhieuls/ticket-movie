@@ -2,27 +2,38 @@ package com.example.english.Service.Implement;
 
 import com.cloudinary.Cloudinary;
 import com.example.english.Configuration.CommonConfig;
+import com.example.english.Dto.Request.FilterMovie;
 import com.example.english.Dto.Request.MovieRequest;
 import com.example.english.Dto.Response.MovieDetailResponse;
+import com.example.english.Dto.Response.MovieResponse;
 import com.example.english.Dto.Response.MovieSummaryResponse;
 import com.example.english.Entity.Movie;
+import com.example.english.Entity.ShowTime;
 import com.example.english.Exception.AppException;
 import com.example.english.Exception.ErrorCode;
 import com.example.english.Mapper.MovieMapper;
 import com.example.english.Repository.MovieRepository;
+import com.example.english.Repository.ShowTimeRepository;
 import com.example.english.Service.Interface.MovieService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +44,7 @@ public class MovieServiceImpl implements MovieService {
     CommonConfig commonConfig;
     Cloudinary cloudinary;
     MovieMapper movieMapper;
+    ShowTimeRepository showTimeRepository;
 
     private static final long MAX_FILE_SIZE = 5L * 1024 * 1024;
 
@@ -161,5 +173,57 @@ public class MovieServiceImpl implements MovieService {
         else{
             return movieMapper.toMovieSummaryResponses(movies);
         }
+    }
+
+    @Override
+    public List<String> getListCinemaAddress(FilterMovie filterMovie) {
+        if(!movieRepository.existsById(filterMovie.getId())) {
+            throw new AppException(ErrorCode.MOVIE_NOT_FOUND);
+        }
+        LocalTime currentTime = filterMovie.getDate().equals(LocalDate.now())
+                ? LocalTime.now().minusMinutes(20)
+                : LocalTime.MIDNIGHT;
+
+        List<ShowTime> showTimeEntityList = showTimeRepository.findByMovie_IdAndShowDateAndStartTimeAfterAndStatusTrue(
+                filterMovie.getId(),
+                filterMovie.getDate(),
+                currentTime
+        );
+        Set<String> cinemaAddressList = new HashSet<>();
+
+        for(ShowTime st : showTimeEntityList){
+            String address = st.getScreenRoom().getCinema().getAddress();
+            cinemaAddressList.add(address);
+        }
+        return new ArrayList<>(cinemaAddressList);
+    }
+    public String getStatus(Movie movieEntity) {
+        if(movieEntity.getReleaseDate().isAfter(LocalDate.now())){
+            return "Sắp chiếu";
+        }
+        if(movieEntity.getEndDate().isBefore(LocalDate.now())){
+            return "Ngừng chiếu";
+        }
+        return "Đang chiếu";
+    }
+    @Override
+    public Page<MovieSummaryResponse> getFilterMovie(Integer pageNumber, Integer pageSize, String category, String brand, String properties, String sortDir, BigDecimal minPrice, BigDecimal maxPrice) {
+        //        Pageable         -> Chỉ định yêu cầu phân trang (số trang, kích thước, sắp xếp)
+//PageRequest      -> Tạo cụ thể đối tượng Pageable
+//Page<T>          -> Kết quả trả về từ phương thức truy vấn (có dữ liệu + thông tin phân trang)
+        Pageable pageable = null;
+        if (pageNumber == null || pageNumber < 0) pageNumber = 0;
+        if (pageSize == null || pageSize <= 0) pageSize = 10;
+        String sortField = (properties != null) ? properties : "name";
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        pageable = PageRequest.of(pageNumber, pageSize, Sort.by(direction, sortField ));
+        Page<Movie> moviePage = movieRepository.findAll(pageable);
+        return moviePage.map(movieMapper::toMovieSummaryResponse);
+    }
+
+    @Override
+    public List<MovieResponse> getMovieShowDay(LocalDate date) {
+        List<Movie> movieEntityList = movieRepository.findNowPlayingMovies(date);
+        return movieMapper.toMovieResponses(movieEntityList);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.english.Service.Implement;
 
+import com.example.english.Configuration.RandomCode;
 import com.example.english.Dto.Request.InvoiceRequest;
 import com.example.english.Dto.Response.InvoiceDetailAD;
 import com.example.english.Dto.Response.InvoiceDetailResponse;
@@ -10,12 +11,10 @@ import com.example.english.Entity.*;
 import com.example.english.Enum.InvoiceStatus;
 import com.example.english.Exception.AppException;
 import com.example.english.Exception.ErrorCode;
-import com.example.english.Repository.InvoiceRepository;
-import com.example.english.Repository.SeatRepository;
-import com.example.english.Repository.ShowTimeRepository;
-import com.example.english.Repository.UserRepository;
+import com.example.english.Repository.*;
 import com.example.english.Service.Interface.InvoiceService;
 import com.example.english.Service.Interface.TicketPriceService;
+import com.example.english.Service.Interface.TicketService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +28,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,8 @@ public class InvoiceServiceImpl implements InvoiceService {
     SeatRepository seatRepository;
     TicketPriceService ticketPriceService;
     InvoiceRepository invoiceRepository;
+    TicketService ticketService;
+    TicketRepository ticketRepository;
     private User getUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
@@ -54,6 +57,10 @@ public class InvoiceServiceImpl implements InvoiceService {
     private BigDecimal parseAmount(String vnpAmount) {
         long amount = Long.parseLong(vnpAmount);
         return BigDecimal.valueOf(amount);
+    }
+    Ticket getTicket(Long invoiceId) {
+        return ticketRepository.findFirstByInvoice_Id(invoiceId)
+                .orElseThrow(()->new AppException(ErrorCode.INVOICE_NOT_EXISTED));
     }
     @Transactional
     @Override
@@ -114,36 +121,139 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public void updateInvoice(String vnp_TxnRef) {
-
+        Invoice invoiceEntity = invoiceRepository.findByTxnRef(vnp_TxnRef)
+                .orElseThrow(()->new AppException(ErrorCode.INVOICE_NOT_EXISTED));
+        String bookingCode = RandomCode.generate(12);
+        invoiceEntity.setStatus(String.valueOf(InvoiceStatus.PAID));
+        invoiceEntity.setBookingCode(bookingCode);
+        try {
+            ticketService.createTicket(vnp_TxnRef, invoiceRepository.save(invoiceEntity));
+        }catch (DataAccessException e){
+            throw new AppException(ErrorCode.DATA_VIOLATION);
+        }
     }
 
     @Override
     public List<InvoiceResponse> getInvoiceList() {
-        return List.of();
+        User user = getUser();
+        List<Invoice> invoiceEntityList = invoiceRepository.findByUser_Id(user.getId());
+        List<InvoiceResponse> invoiceResponseList = new ArrayList<>();
+        for (Invoice invoiceEntity : invoiceEntityList) {
+            Ticket ticketEntity = getTicket(invoiceEntity.getId());
+            int totalTicket = ticketRepository.countByInvoice_Id(invoiceEntity.getId());
+            InvoiceResponse invoiceResponse = InvoiceResponse.builder()
+                    .invoiceId(invoiceEntity.getId())
+                    .totalMoney(invoiceEntity.getTotalAmount())
+                    .movieName(ticketEntity.getShowTime().getMovie().getName())
+                    .totalTicket(totalTicket)
+                    .showDate(ticketEntity.getShowTime().getShowDate())
+                    .startTime(ticketEntity.getShowTime().getStartTime())
+                    .build();
+            invoiceResponseList.add(invoiceResponse);
+        }
+        return invoiceResponseList;
     }
+
 
     @Override
     public InvoiceDetailResponse getInvoice(Long invoiceId) {
-        return null;
+        Invoice invoiceEntity = invoiceRepository.findById(invoiceId)
+                .orElseThrow(()->new AppException(ErrorCode.INVOICE_NOT_EXISTED));
+        return  getInvoiceDetail(invoiceEntity);
     }
 
     @Override
     public InvoiceDetailResponse getInvoiceByBookingCode(String bookingCode) {
-        return null;
+        Invoice invoiceEntity = invoiceRepository.findByBookingCode(bookingCode)
+                .orElseThrow(()->new AppException(ErrorCode.INVOICE_NOT_EXISTED));
+        return getInvoiceDetail(invoiceEntity);
     }
 
     @Override
     public void checkInInvoice(Long invoiceId) {
-
+        Invoice invoiceEntity = invoiceRepository.findById(invoiceId)
+                .orElseThrow(()->new AppException(ErrorCode.INVOICE_NOT_EXISTED));
+        invoiceEntity.setStatus(String.valueOf(InvoiceStatus.CHECKED_IN));
+        invoiceRepository.save(invoiceEntity);
     }
 
     @Override
     public List<InvoiceSummary> getInvoiceSummaryList() {
-        return List.of();
+        List<Invoice> invoiceEntityList = invoiceRepository.findAll();
+        List<InvoiceSummary> invoiceSummaryList = new ArrayList<>();
+        for (Invoice invoiceEntity : invoiceEntityList) {
+            Ticket ticketEntity = getTicket(invoiceEntity.getId());
+            String showtime = ticketEntity.getShowTime().getStartTime().toString() + "-" +
+                    ticketEntity.getShowTime().getEndTime().toString() + " " +
+                    ticketEntity.getShowTime().getShowDate().toString();
+            String screenRoom = ticketEntity.getShowTime().getScreenRoom().getName() + " - " +
+                    ticketEntity.getShowTime().getScreenRoom().getCinema().getName();
+            InvoiceSummary invoiceSummary = InvoiceSummary.builder()
+                    .id(invoiceEntity.getId())
+                    .code(invoiceEntity.getBookingCode())
+                    .movieName(ticketEntity.getShowTime().getMovie().getName())
+                    .showTime(showtime)
+                    .screenRoom(screenRoom)
+                    .totalMoney(invoiceEntity.getTotalAmount())
+                    .createDate(invoiceEntity.getCreatedDate().toString())
+                    .build();
+            invoiceSummaryList.add(invoiceSummary);
+        }
+        return invoiceSummaryList;
     }
 
     @Override
     public InvoiceDetailAD getInvoiceDetail(Long id) {
-        return null;
+        Invoice invoiceEntity = invoiceRepository.findById(id)
+                .orElseThrow(()->new AppException(ErrorCode.INVOICE_NOT_EXISTED));
+        Ticket ticketEntity = getTicket(invoiceEntity.getId());
+        List<InvoiceDetailAD.SeatInvoice> seatInvoices = invoiceEntity.getTickets().stream()
+                .map(t -> {InvoiceDetailAD.SeatInvoice seat = new InvoiceDetailAD.SeatInvoice();
+                    seat.setId(t.getId());
+                    seat.setSeatCode(t.getSeat().getSeatCode());
+                    seat.setPrice(t.getTicketPrice().getPrice());
+                    return seat;
+                }).toList();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return InvoiceDetailAD.builder()
+                .invoiceId(invoiceEntity.getId())
+                .bookingCode(invoiceEntity.getBookingCode())
+                .movieName(ticketEntity.getShowTime().getMovie().getName())
+                .screenRoomName(ticketEntity.getShowTime().getScreenRoom().getCinema().getName())
+                .screenRoomTypeName(ticketEntity.getShowTime().getScreenRoom().getCinema().getCinemaType().getName())
+                .cinema(ticketEntity.getShowTime().getScreenRoom().getCinema().getName())
+                .showTime(ticketEntity.getShowTime().getStartTime().toString() + "-" +
+                        ticketEntity.getShowTime().getEndTime().toString())
+                .showDate(ticketEntity.getShowTime().getShowDate().format(formatter))
+                .bookDay(invoiceEntity.getCreatedDate().format(formatter))
+                .userId(invoiceEntity.getUser().getId())
+                .userName(invoiceEntity.getUser().getFirstName() + " " + invoiceEntity.getUser().getLastName())
+                .userEmail(invoiceEntity.getUser().getEmail())
+                .userPhone(invoiceEntity.getUser().getPhone())
+                .status(invoiceEntity.getStatus())
+                .totalMoney(invoiceEntity.getTotalAmount())
+                .seatList(seatInvoices)
+                .build();
+    }
+
+
+    public InvoiceDetailResponse getInvoiceDetail(Invoice invoiceEntity) {
+        Ticket ticketEntity = getTicket(invoiceEntity.getId());
+
+        List<String> seatCodeList = ticketRepository.findSeatCodesByInvoiceId(invoiceEntity.getId());
+        return InvoiceDetailResponse.builder()
+                .bookingCode(invoiceEntity.getBookingCode())
+                .movieName(ticketEntity.getShowTime().getMovie().getName())
+                .totalMoney(invoiceEntity.getTotalAmount())
+                .totalTicket(seatCodeList.size())
+                .showDate(ticketEntity.getShowTime().getShowDate())
+                .startTime(ticketEntity.getShowTime().getStartTime())
+                .screenRoomName(ticketEntity.getShowTime().getScreenRoom().getName())
+                .screenRoomType(ticketEntity.getShowTime().getScreenRoom().getScreenRoomType().getName())
+                .seatList(seatCodeList)
+                .userId(invoiceEntity.getUser().getId())
+                .userName(invoiceEntity.getUser().getFirstName() + " " + invoiceEntity.getUser().getLastName())
+                .invoiceId(invoiceEntity.getId())
+                .build();
     }
 }

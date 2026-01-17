@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -27,6 +28,6 @@ public class Invoice{
     @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     User user;
-//    @OneToMany (mappedBy = "invoice", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-//    java.util.List<Ticket> tickets;
+    @OneToMany (mappedBy = "invoice", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    List<Ticket> tickets;
 }

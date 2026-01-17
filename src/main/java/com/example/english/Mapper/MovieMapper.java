@@ -2,6 +2,7 @@ package com.example.english.Mapper;
 
 import com.example.english.Dto.Request.MovieRequest;
 import com.example.english.Dto.Response.MovieDetailResponse;
+import com.example.english.Dto.Response.MovieResponse;
 import com.example.english.Dto.Response.MovieSummaryResponse;
 import com.example.english.Entity.Movie;
 import org.mapstruct.Mapper;
@@ -15,4 +16,7 @@ public interface MovieMapper {
     MovieDetailResponse toMovieDetailResponse(Movie movie);
     void updateMovie(MovieRequest request, @MappingTarget Movie movie);
     List<MovieSummaryResponse> toMovieSummaryResponses(List<Movie> movies);
+    MovieResponse toMovieResponse(Movie movie);
+    List<MovieResponse> toMovieResponses(List<Movie> movies);
+    MovieSummaryResponse toMovieSummaryResponse(Movie movie);
 }

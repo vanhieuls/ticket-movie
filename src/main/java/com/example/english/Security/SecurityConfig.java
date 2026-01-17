@@ -33,7 +33,7 @@ public class SecurityConfig {
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     JwtAuthenticationFilter jwtAuthenticationFilter;
     String [] PUBLIC_ENDPOINT={"/users/**","/auth/verify-user","/auth/sign-up","/auth/resend-verification",
-            "/auth/sign-in","/auth/forgot-password","/auth/reset-password"};
+            "/auth/sign-in","/auth/forgot-password","/auth/reset-password","/chatbot/chat"};
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);

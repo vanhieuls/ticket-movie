@@ -7,7 +7,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+		org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration.class
+})
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class EnglishApplication {
 

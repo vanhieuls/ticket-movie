@@ -1,0 +1,29 @@
+services:
+    # Redis
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - booking_app
+
+  # Qdrant
+  qdrant:
+    image: qdrant/qdrant:v1.13.2
+    container_name: qdrant
+    ports:
+      - "6333:6333"  # REST API (for dashboard and HTTP clients)
+      - "6334:6334"  # gRPC (for Spring AI)
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    networks:
+      - booking_app
+volumes:
+  redis_data:
+  qdrant_storage:
+networks:
+  booking_app:
+    driver: bridge

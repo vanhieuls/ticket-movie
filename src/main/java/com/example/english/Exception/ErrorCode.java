@@ -65,8 +65,9 @@ public enum ErrorCode {
     SHOWTIME_NOT_FOUND(9003,"Showtime not found", HttpStatus.NOT_FOUND),
     //////////////////////////////////////////
     ORDER_CREATE_FAILED(11001,"Order creation failed", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_PRICE(11002,"Invalid price", HttpStatus.BAD_REQUEST)
-
+    INVALID_PRICE(11002,"Invalid price", HttpStatus.BAD_REQUEST),
+        ///invoice////
+    INVOICE_NOT_EXISTED(12001,"Invoice does not exist", HttpStatus.NOT_FOUND)
     ;
     int code;
     String message;
