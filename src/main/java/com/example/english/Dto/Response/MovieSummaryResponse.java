@@ -15,7 +15,7 @@ public class MovieSummaryResponse {
     Long id;
     String name;
     String posterUrl;
-    String duration;
+    int duration;
     int ageLimit;
     String category;
     LocalDate releaseDate;

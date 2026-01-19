@@ -31,9 +31,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +39,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MovieServiceImpl implements MovieService {
     MovieRepository movieRepository;
-    CommonConfig commonConfig;
     Cloudinary cloudinary;
     MovieMapper movieMapper;
     ShowTimeRepository showTimeRepository;
@@ -69,12 +66,16 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public MovieDetailResponse createMovie(MovieRequest movieRequest, MultipartFile imageFiles) {
+        log.info("Received movieRequest: {}", movieRequest);
+        log.info("Movie name: {}, duration: {}, description: {}",
+                movieRequest.getName(), movieRequest.getDuration(), movieRequest.getDescription());
+
         if(movieRepository.existsByName(movieRequest.getName())){
             throw new AppException(ErrorCode.MOVIE_ALREADY_EXISTS);
         }
-        if(movieRequest.getReleaseDate().isAfter(movieRequest.getEndDate())){
-            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
-        }
+//        if(movieRequest.getReleaseDate().isAfter(movieRequest.getEndDate())){
+//            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+//        }
         if(imageFiles.isEmpty()){
             throw new AppException(ErrorCode.FILE_REQUIRED);
         }
@@ -95,9 +96,9 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDetailResponse updateMovie(Long id, MovieRequest movieRequest, MultipartFile imageFiles) {
         Movie movie = movieRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.MOVIE_NOT_FOUND));
-        if(movieRequest.getReleaseDate().isAfter(movieRequest.getEndDate())){
-            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
-        }
+//        if(movieRequest.getReleaseDate().isAfter(movieRequest.getEndDate())){
+//            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+//        }
         if(imageFiles!=null && !imageFiles.isEmpty()){
             validatePoster(imageFiles);
             try {
@@ -145,12 +146,15 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public List<MovieSummaryResponse> getAllMovies() {
-        List<Movie> movies = movieRepository.findAll();
-        if(movies.isEmpty()){
+    public Page<MovieSummaryResponse> getAllMovies(Integer pageNumber, Integer pageSize) {
+        if(pageNumber == null || pageNumber < 0) pageNumber = 0;
+        if(pageSize == null || pageSize <= 0) pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
+        Page<Movie> moviePage = movieRepository.findAll(pageable);
+        if (moviePage.isEmpty()) {
             throw new AppException(ErrorCode.MOVIE_NOT_FOUND);
         }
-        return movieMapper.toMovieSummaryResponses(movies);
+        return moviePage.map(movieMapper::toMovieSummaryResponse);
     }
 
     @Override
@@ -177,7 +181,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<String> getListCinemaAddress(FilterMovie filterMovie) {
-        if(!movieRepository.existsById(filterMovie.getId())) {
+        if(!movieRepository.existsById(filterMovie.getMovieId())) {
             throw new AppException(ErrorCode.MOVIE_NOT_FOUND);
         }
         LocalTime currentTime = filterMovie.getDate().equals(LocalDate.now())
@@ -185,12 +189,11 @@ public class MovieServiceImpl implements MovieService {
                 : LocalTime.MIDNIGHT;
 
         List<ShowTime> showTimeEntityList = showTimeRepository.findByMovie_IdAndShowDateAndStartTimeAfterAndStatusTrue(
-                filterMovie.getId(),
+                filterMovie.getMovieId(),
                 filterMovie.getDate(),
                 currentTime
         );
         Set<String> cinemaAddressList = new HashSet<>();
-
         for(ShowTime st : showTimeEntityList){
             String address = st.getScreenRoom().getCinema().getAddress();
             cinemaAddressList.add(address);

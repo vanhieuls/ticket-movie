@@ -5,6 +5,7 @@ import jakarta.persistence.Lob;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Builder
@@ -17,7 +18,7 @@ public class MovieDetailResponse {
     Long id;
     String name;
     String description;
-    String duration;
+    int duration;
     String category;
     String country;
     String director;
@@ -26,6 +27,8 @@ public class MovieDetailResponse {
     int ageLimit;
     String trailerUrl;
     boolean status;
+    LocalDate releaseDate;
+    LocalDate endDate;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

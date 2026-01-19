@@ -19,7 +19,7 @@ public interface MovieService {
     void deleteMovie(Long id);
     MovieDetailResponse getMovie(Long id);
     void updateMovieActive(Long id);
-    List<MovieSummaryResponse> getAllMovies();
+    Page<MovieSummaryResponse> getAllMovies(Integer pageNumber, Integer pageSize);
     List<MovieSummaryResponse> getNowPlayingMovies();
     List<MovieSummaryResponse> getUpcomingMovies();
     List<String> getListCinemaAddress(FilterMovie filterMovie);

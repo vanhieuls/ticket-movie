@@ -7,10 +7,7 @@ import lombok.Data;
 import java.time.LocalDate;
 @Data
 public class FilterMovie {
-    @JsonProperty("movie_id")
-    private Long id;
-
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    private Long movieId;
     private LocalDate date;
     private String address;
 }

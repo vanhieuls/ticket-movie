@@ -23,7 +23,7 @@ public class Movie extends BaseEntity {
     @Lob
     @Column(columnDefinition = "TEXT")
     String description;
-    String duration;
+    int duration;
     String category;
     String country;
     String director;
@@ -37,6 +37,5 @@ public class Movie extends BaseEntity {
     LocalDate endDate;
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<ShowTime> showTimes;
-
 
 }

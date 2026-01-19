@@ -6,11 +6,12 @@ import com.example.english.Dto.Response.MovieResponse;
 import com.example.english.Dto.Response.MovieSummaryResponse;
 import com.example.english.Entity.Movie;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {})
+@Mapper(componentModel = "spring")
 public interface MovieMapper {
     Movie toMovie(MovieRequest request);
     MovieDetailResponse toMovieDetailResponse(Movie movie);
