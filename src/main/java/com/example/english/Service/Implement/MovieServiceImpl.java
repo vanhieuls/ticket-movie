@@ -149,8 +149,8 @@ public class MovieServiceImpl implements MovieService {
     public Page<MovieSummaryResponse> getAllMovies(Integer pageNumber, Integer pageSize) {
         if(pageNumber == null || pageNumber < 0) pageNumber = 0;
         if(pageSize == null || pageSize <= 0) pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
-        Page<Movie> moviePage = movieRepository.findAll(pageable);
+//        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
+        Page<Movie> moviePage = movieRepository.findAll(PageRequest.of(pageNumber, pageSize));
         if (moviePage.isEmpty()) {
             throw new AppException(ErrorCode.MOVIE_NOT_FOUND);
         }

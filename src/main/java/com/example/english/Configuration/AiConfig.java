@@ -45,7 +45,7 @@ public class AiConfig {
     public QuestionAnswerAdvisor questionAnswerAdvisor(VectorStore vectorStore) {
         SearchRequest defaultSearch = SearchRequest.builder()
                 .topK(20)
-                .similarityThreshold(0.70)
+                .similarityThreshold(0.50)
                 .build();
 
         return QuestionAnswerAdvisor.builder(vectorStore)

@@ -37,6 +37,9 @@ public class RagDocumentMapper {
         );
 
         Map<String,Object> meta = new HashMap<>();
+//        meta.put("category", m.getCategory());
+//        meta.put("director", m.getDirector());
+//        meta.put("name", m.getName());
         meta.put("type", "movie");
         meta.put("id", "movie/" + m.getId());
         meta.put("movieId", m.getId());

@@ -17,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,7 +45,7 @@ public class CinemaServiceImpl implements CinemaService {
             Cinema saved = cinemaRepository.save(cinema);
             CinemaResponse cinemaResponse = cinemaMapper.toCinemaResponse(saved);
 //            cinemaResponse.setCinemaTypeName(cinemaType.getName());
-            cinemaResponse.setStatus(Boolean.valueOf(Boolean.TRUE.equals(cinema.getStatus()) ? "Đang hoạt đông" : "Tạm ngừng hoạt động"));
+            cinemaResponse.setStatus(Boolean.TRUE.equals(cinema.getStatus()) ? "Đang hoạt đông" : "Tạm ngừng hoạt động");
             return cinemaResponse;
         }
         catch (DataIntegrityViolationException e) {
@@ -62,7 +65,7 @@ public class CinemaServiceImpl implements CinemaService {
             Cinema saved = cinemaRepository.save(cinemaEntity);
             CinemaResponse cinemaResponse = cinemaMapper.toCinemaResponse(saved);
 //            cinemaResponse.setCinemaTypeName(cinemaType.getName());
-            cinemaResponse.setStatus(Boolean.valueOf(Boolean.TRUE.equals(cinemaEntity.getStatus()) ? "Đang hoạt đông" : "Tạm ngừng hoạt động"));
+            cinemaResponse.setStatus(Boolean.TRUE.equals(cinemaEntity.getStatus()) ? "Đang hoạt đông" : "Tạm ngừng hoạt động");
             return cinemaResponse;
         }catch (DataIntegrityViolationException e) {
             throw new AppException(ErrorCode.DATA_VIOLATION);
@@ -83,17 +86,24 @@ public class CinemaServiceImpl implements CinemaService {
                 () -> new AppException(ErrorCode.CINEMA_NOT_EXISTED)
         );
         CinemaResponse cinemaResponse = cinemaMapper.toCinemaResponse(cinema);
-        cinemaResponse.setStatus(Boolean.valueOf(Boolean.TRUE.equals(cinema.getStatus()) ? "Đang hoạt đông" : "Tạm ngừng hoạt động"));
+        cinemaResponse.setStatus(Boolean.TRUE.equals(cinema.getStatus()) ? "Đang hoạt đông" : "Tạm ngừng hoạt động");
         return cinemaResponse;
     }
 
     @Override
-    public List<CinemaResponse> getListCinemas() {
-        List<Cinema> cinemaEntities = cinemaRepository.findAll();
-        if(cinemaEntities.isEmpty()){
+    public Page<CinemaResponse> getListCinemas(Integer pageNumber, Integer sizeNumber) {
+        if(pageNumber == null || pageNumber < 0){
+            pageNumber = 0;
+        }
+        if(sizeNumber == null || sizeNumber <0 ){
+            sizeNumber = 10;
+        }
+        Pageable pageable = PageRequest.of(pageNumber, sizeNumber);
+        Page<Cinema> cinemaPage = cinemaRepository.findAll(pageable);
+        if(cinemaPage.isEmpty()){
             throw new AppException(ErrorCode.CINEMA_NOT_EXISTED);
         }
-        return cinemaMapper.toCinemaResponses(cinemaEntities);
+        return cinemaPage.map(cinemaMapper::toCinemaResponse);
     }
 
     @Override

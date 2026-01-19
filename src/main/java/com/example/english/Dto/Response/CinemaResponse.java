@@ -12,6 +12,6 @@ public class CinemaResponse {
     Long id;
     String name;
     String address;
-    Boolean status;
+    String status;
     String cinemaTypeName;
 }

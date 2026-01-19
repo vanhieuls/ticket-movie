@@ -26,7 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/movies")
 @Tag(name = "Movie Controller", description = "APIs quản lý phim cho admin")
-public class MovieController {
+public class MovieAdminController {
     MovieService movieService;
 
     @Operation(summary = "Tạo mới phim")
@@ -64,7 +64,7 @@ public class MovieController {
 
     @Operation(summary = "Lấy danh sách tất cả phim")
     @GetMapping
-    public Page<MovieSummaryResponse> getAllMovies(@RequestParam Integer pageNumber, @RequestParam Integer pageSize) {
+    public Page<MovieSummaryResponse> getAllMovies(@RequestParam(required = false, defaultValue = "0") Integer pageNumber, @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
         return movieService.getAllMovies(pageNumber, pageSize);
     }
 

@@ -71,7 +71,11 @@ public class RagFilterBuilder {
         }
 
         // --- 2. Các điều kiện Metadata phụ ---
-
+        // --- Category (Thể loại phim) ---
+//        String category = detectCategory(q);
+//        if (category != null) {
+//            parts.add("category LIKE '%" + category + "%'");
+//        }
         // --- Country ---
         String countryCode = detectCountryCode(q);
         if (countryCode != null) {
@@ -111,6 +115,21 @@ public class RagFilterBuilder {
     private static Boolean detectStatus(String lowerAscii) {
         if (containsAny(lowerAscii, "dang hoat dong", "dang dung", "dang mo")) return true;
         if (containsAny(lowerAscii, "tam ngung", "tam dung", "ngung", "dong cua")) return false;
+        return null;
+    }
+    private static String detectCategory(String lowerAscii) {
+        if (containsAny(lowerAscii, "hanh dong", "action")) return "Hành động";
+        if (containsAny(lowerAscii, "kinh di", "horror")) return "Kinh dị";
+        if (containsAny(lowerAscii, "tinh cam", "romance", "lang man")) return "Tình cảm";
+        if (containsAny(lowerAscii, "hai", "comedy", "hai huoc")) return "Hài";
+        if (containsAny(lowerAscii, "hoat hinh", "animation")) return "Hoạt hình";
+        if (containsAny(lowerAscii, "khoa hoc vien tuong", "sci fi", "scifi")) return "Khoa học viễn tưởng";
+        if (containsAny(lowerAscii, "phieu luu", "adventure")) return "Phiêu lưu";
+        if (containsAny(lowerAscii, "tam ly", "drama")) return "Tâm lý";
+        if (containsAny(lowerAscii, "gia dinh", "family")) return "Gia đình";
+        if (containsAny(lowerAscii, "chien tranh", "war")) return "Chiến tranh";
+        if (containsAny(lowerAscii, "hinh su", "crime")) return "Hình sự";
+        if (containsAny(lowerAscii, "lich su", "history")) return "Lịch sử";
         return null;
     }
 }
