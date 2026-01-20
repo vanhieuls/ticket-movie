@@ -17,12 +17,7 @@ public interface ScreenRoomRepository extends JpaRepository<ScreenRoom,Long> {
 //from ScreenRoomEntity sr
 //where sr.cinema.id = :cinemaId
 //""")
-    @Query("""
-            select sr from ScreenRoom sr
-            join fetch ScreenRoomType srt
-            Where sr.cinema.id = :cinemaId
-            """)
-    List<ScreenRoom> findByCinemaIdType(@Param("cinemaId") Long cinemaId);
+    List<ScreenRoom> findByCinemaId(@Param("cinemaId") Long cinemaId);
     List<ScreenRoom> findByCinemaIdAndStatusTrue(Long cinemaId);
 
 }

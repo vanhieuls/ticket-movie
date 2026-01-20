@@ -12,6 +12,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface SeatTypeMapper {
     SeatType toSeatTypeEntity (SeatTypeRequest seatTypeRequest);
+    @Mapping(target = "status", expression = "java(seatType.isStatus() ? \"Đang hoạt động\" : \"Tạm ngưng hoạt động\")")
     SeatTypeResponse toSeatTypeResponse (SeatType seatType);
     void updateSeatType(SeatTypeRequest request, @MappingTarget SeatType seatType);
     List<SeatTypeResponse> toSeatTypeResponseList (List<SeatType> seatTypes);

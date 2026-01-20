@@ -116,10 +116,10 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public List<CinemaTypeResponse> getCinemaTypes() {
-        List<Cinema> cinemas = cinemaRepository.findAll();
+        List<CinemaType> cinemas = cinemaTypeRepository.findAll();
         if(cinemas.isEmpty()){
             throw new AppException(ErrorCode.CINEMA_NOT_EXISTED);
         }
-        return cinemaMapper.toCinemaTypeResponses(cinemas);
+        return cinemaMapper.toCinemaTypeResponsesFromCinemaTypes(cinemas);
     }
 }

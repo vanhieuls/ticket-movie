@@ -14,11 +14,11 @@ import java.time.LocalTime;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowTimeRequest {
-    @JsonFormat(pattern = "dd-MM-yyyy")
+//    @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate showDate;
-    @JsonFormat(pattern = "HH:mm")
+//    @JsonFormat(pattern = "HH:mm")
     LocalTime startTime;
-    @JsonFormat(pattern = "HH:mm")
+//    @JsonFormat(pattern = "HH:mm")
     LocalTime endTime;
     Long screenRoomId;
     Long movieId;

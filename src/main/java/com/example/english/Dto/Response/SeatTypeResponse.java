@@ -13,4 +13,5 @@ public class SeatTypeResponse {
     Long id;
     String name;
     Double priceFactor;
+    String status;
 }

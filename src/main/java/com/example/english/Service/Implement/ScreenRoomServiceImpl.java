@@ -3,7 +3,9 @@ package com.example.english.Service.Implement;
 import com.example.english.Dto.Request.ScreenRoomRequest;
 import com.example.english.Dto.Response.ScreenRoomDetailResponse;
 import com.example.english.Dto.Response.ScreenRoomResponse;
+import com.example.english.Entity.Cinema;
 import com.example.english.Entity.ScreenRoom;
+import com.example.english.Entity.ScreenRoomType;
 import com.example.english.Exception.AppException;
 import com.example.english.Exception.ErrorCode;
 import com.example.english.Mapper.ScreenRoomMapper;
@@ -36,9 +38,13 @@ public class ScreenRoomServiceImpl implements ScreenRoomService {
         )){
             throw  new AppException(ErrorCode.SCREEN_ROOM_EXISTED);
         }
+        Cinema cinema = cinemaRepository.findById(screenRoomRequest.getCinemaId())
+                .orElseThrow(() -> new AppException(ErrorCode.CINEMA_NOT_EXISTED));
+        ScreenRoomType screenRoomType = screenRoomTypeRepository.findById(screenRoomRequest.getScreenRoomTypeId())
+                .orElseThrow(() -> new AppException(ErrorCode.SCREEN_ROOM_TYPE_NOT_EXISTED));
         ScreenRoom screenRoom = screenRoomMapper.toScreenRoom(screenRoomRequest);
-        screenRoom.setScreenRoomType(screenRoomTypeRepository.findById(screenRoomRequest.getScreenRoomTypeId()).get());
-        screenRoom.setCinema(cinemaRepository.findById(screenRoomRequest.getCinemaId()).get());
+        screenRoom.setScreenRoomType(screenRoomType);
+        screenRoom.setCinema(cinema);
         screenRoomRepository.save(screenRoom);
         return screenRoomMapper.toScreenRoomResponse(screenRoom);
     }
@@ -54,16 +60,20 @@ public class ScreenRoomServiceImpl implements ScreenRoomService {
         )){
             throw  new AppException(ErrorCode.SCREEN_ROOM_EXISTED);
         }
+        Cinema cinema = cinemaRepository.findById(screenRoomRequest.getCinemaId())
+                .orElseThrow(() -> new AppException(ErrorCode.CINEMA_NOT_EXISTED));
+        ScreenRoomType screenRoomType = screenRoomTypeRepository.findById(screenRoomRequest.getScreenRoomTypeId())
+                .orElseThrow(() -> new AppException(ErrorCode.SCREEN_ROOM_TYPE_NOT_EXISTED));
         screenRoomMapper.updateScreenRoomFromRequest(screenRoomRequest, screenRoomEntity);
-        screenRoomEntity.setScreenRoomType(screenRoomTypeRepository.findById(screenRoomRequest.getScreenRoomTypeId()).get());
-        screenRoomEntity.setCinema(cinemaRepository.findById(screenRoomRequest.getCinemaId()).get());
+        screenRoomEntity.setScreenRoomType(screenRoomType);
+        screenRoomEntity.setCinema(cinema);
         screenRoomRepository.save(screenRoomEntity);
         return screenRoomMapper.toScreenRoomResponse(screenRoomEntity);
     }
 
     @Override
     public List<ScreenRoomDetailResponse> getScreenRoomList(Long id) {
-        return screenRoomRepository.findByCinemaIdType(id).stream()
+        return screenRoomRepository.findByCinemaId(id).stream()
                 .map(
                         screenRoomMapper::toScreenRoomDetailResponse
                 )

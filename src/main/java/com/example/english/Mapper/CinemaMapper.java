@@ -5,6 +5,7 @@ import com.example.english.Dto.Response.CinemaResponse;
 import com.example.english.Dto.Response.CinemaSummaryResponse;
 import com.example.english.Dto.Response.CinemaTypeResponse;
 import com.example.english.Entity.Cinema;
+import com.example.english.Entity.CinemaType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -24,4 +25,6 @@ public interface CinemaMapper {
     List<CinemaSummaryResponse> toCinemaSummaryResponses(List<Cinema> cinemas);
     void updateCinemaFromRequest(CinemaRequest cinemaRequest, @MappingTarget Cinema cinema);
     List<CinemaResponse> toCinemaResponses(List<Cinema> cinemas);
+    CinemaTypeResponse toCinemaTypeResponseFromCinemaType(CinemaType cinemaType);
+    List<CinemaTypeResponse> toCinemaTypeResponsesFromCinemaTypes(List<CinemaType> cinemaTypes);
 }
