@@ -51,15 +51,15 @@ public class ScreenRoomAdminController {
 
     @GetMapping("/{cinemaId}")
     @Operation(summary = "Get Screen Room List", description = "API lấy danh sách phòng chiếu theo rạp")
-    public ApiResponse<List<ScreenRoomDetailResponse>> getScreenRoomList(@PathVariable Long id) {
+    public ApiResponse<List<ScreenRoomDetailResponse>> getScreenRoomList(@PathVariable Long cinemaId) {
         return ApiResponse.<List<ScreenRoomDetailResponse>>builder()
                 .code(200)
                 .message("Get screen room list successfully")
-                .result(screenRoomService.getScreenRoomList(id))
+                .result(screenRoomService.getScreenRoomList(cinemaId))
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("/detail/{id}")
     @Operation(summary = "Get Screen Room Detail", description = "API lấy chi tiết phòng chiếu")
     public ApiResponse<ScreenRoomResponse> getScreenRoom(@PathVariable Long id) {
         return ApiResponse.<ScreenRoomResponse>builder()
@@ -81,11 +81,11 @@ public class ScreenRoomAdminController {
 
     @GetMapping("/active/cinema/{cinemaId}")
     @Operation(summary = "Get Screen Room Active List", description = "API lấy danh sách phòng chiếu đang hoạt động theo rạp")
-    public ApiResponse<List<ScreenRoomDetailResponse>> getScreenRoomActiveList(@PathVariable Long id) {
+    public ApiResponse<List<ScreenRoomDetailResponse>> getScreenRoomActiveList(@PathVariable Long cinemaId) {
         return ApiResponse.<List<ScreenRoomDetailResponse>>builder()
                 .code(200)
                 .message("Get screen room active list successfully")
-                .result(screenRoomService.getScreenRoomActiveList(id))
+                .result(screenRoomService.getScreenRoomActiveList(cinemaId))
                 .build();
     }
 }

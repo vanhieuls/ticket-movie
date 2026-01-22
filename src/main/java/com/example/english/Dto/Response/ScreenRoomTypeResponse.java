@@ -12,4 +12,5 @@ public class ScreenRoomTypeResponse {
     Long id;
     Double priceFactor;
     String name;
+    String status;
 }

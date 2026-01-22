@@ -14,7 +14,7 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @Builder
-public class ShowTime {
+public class ShowTime extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;

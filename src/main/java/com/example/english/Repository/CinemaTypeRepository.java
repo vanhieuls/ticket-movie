@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface CinemaTypeRepository extends JpaRepository<CinemaType, Long> {
-    Optional<Boolean> findByName(String name);
+    Optional<CinemaType> findByName(String name);
 }
