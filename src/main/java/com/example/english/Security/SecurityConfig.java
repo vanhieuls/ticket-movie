@@ -61,7 +61,7 @@ public class SecurityConfig {
                         "/v3/api-docs/**").permitAll()
                 .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINT).permitAll()
                 .requestMatchers(HttpMethod.PUT, PUBLIC_ENDPOINT).permitAll()
-                .anyRequest().authenticated());
+                .anyRequest().permitAll());
 //        httpSecurity.oauth2Client(Customizer.withDefaults());
         httpSecurity.cors(Customizer.withDefaults()); //Quan trong (Bật cors)
         httpSecurity.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

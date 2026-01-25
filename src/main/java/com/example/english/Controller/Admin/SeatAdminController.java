@@ -32,16 +32,6 @@ public class SeatAdminController {
                 .build();
     }
 
-    @GetMapping("/showtime/{showTimeId}/seats")
-    @Operation(summary = "Get Seats by ShowTime", description = "API lấy danh sách ghế theo suất chiếu")
-    public ApiResponse<SeatShowTime> getListSeat(@PathVariable Long showTimeId) {
-        return ApiResponse.<SeatShowTime>builder()
-                .code(200)
-                .message("Get seats by showtime successfully")
-                .result(seatService.getListSeat(showTimeId))
-                .build();
-    }
-
     @GetMapping("/screen-room/{screenRoomId}")
     @Operation(summary = "Get Seats by Screen Room", description = "API lấy danh sách ghế theo phòng chiếu")
     public ApiResponse<List<SeatSummaryRepo>> getSeatListByScreenRoom(@PathVariable Long screenRoomId) {

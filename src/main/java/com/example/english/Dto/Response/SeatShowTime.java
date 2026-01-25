@@ -15,6 +15,9 @@ public class SeatShowTime {
     Long showTimeId;
     String CinemaName;
     String MovieName;
+    String screenRoomName;
+    String showDate;
+    String showTime;
     int sumSeats;
     List<SeatShowTimeResponse> seatList;
 }

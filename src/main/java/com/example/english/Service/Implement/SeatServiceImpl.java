@@ -16,6 +16,8 @@ import com.example.english.Service.Interface.TicketPriceService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class SeatServiceImpl implements SeatService {
+    private static final Logger log = LoggerFactory.getLogger(SeatServiceImpl.class);
     SeatRepository seatRepository;
     SeatMapper seatMapper;
     TicketRepository ticketRepository;
@@ -109,7 +112,7 @@ public class SeatServiceImpl implements SeatService {
                 .collect(Collectors.toSet());
 
         List<SeatShowTimeResponse> seatList = seatEntityList.stream()
-                .map(seat -> {
+                .map(   seat -> {
                     SeatShowTimeResponse seatResponse = new SeatShowTimeResponse();
                     TicketPrice ticketPrice = ticketPriceService.getSeatTicketPrice(
                             showTime.getScreenRoom().getCinema().getCinemaType().getId(),
@@ -118,7 +121,9 @@ public class SeatServiceImpl implements SeatService {
                             showTime.getShowDate(),
                             showTime.getStartTime()
                     );
+                    log.info("Ticket price for seat ============================== {}: {}",  ticketPrice.getPrice());
                     seatResponse.setPrice(ticketPrice.getPrice());
+                    seatResponse.setId(seat.getId());
                     seatResponse.setSeatCode(seat.getSeatCode());
                     seatResponse.setSeatTypeName(seat.getSeatType().getName());
                     if (bookedSeatIds.contains(seat.getId())) {
@@ -128,13 +133,16 @@ public class SeatServiceImpl implements SeatService {
                     } else {
                         seatResponse.setStatus(SeatStatus.AVAILABLE);
                     }
-                    seatResponse = seatMapper.toSeatShowTimeResponse(seat);
+//                    seatResponse = seatMapper.toSeatShowTimeResponse(seat);
                     return seatResponse;
                 }).toList();
         return SeatShowTime.builder()
                 .showTimeId(showTimeId)
                 .CinemaName(showTime.getScreenRoom().getCinema().getName())
                 .MovieName(showTime.getMovie().getName())
+                .screenRoomName(showTime.getScreenRoom().getName())
+                .showDate(showTime.getShowDate().toString())
+                .showTime(showTime.getStartTime().toString())
                 .sumSeats(seatRepository.countByScreenRoom_Id(screenRoomId))
                 .seatList(seatList)
                 .build();

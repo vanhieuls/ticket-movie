@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -56,7 +58,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private BigDecimal parseAmount(String vnpAmount) {
         long amount = Long.parseLong(vnpAmount);
-        return BigDecimal.valueOf(amount);
+        // VNPay trả về amount * 100, cần chia lại
+        return BigDecimal.valueOf(amount / 100);
     }
     Ticket getTicket(Long invoiceId) {
         return ticketRepository.findFirstByInvoice_Id(invoiceId)
@@ -99,7 +102,11 @@ public class InvoiceServiceImpl implements InvoiceService {
             continue;
         }
 
-        if(!totalMoney.equals(parseAmount(invoiceRequest.getVnp_Amount()))){
+        BigDecimal parsedAmount = parseAmount(invoiceRequest.getVnp_Amount());
+        log.info("totalMoney: {}, parsedAmount: {}", totalMoney, parsedAmount);
+        
+        // Sử dụng compareTo thay vì equals để so sánh BigDecimal
+        if(totalMoney.compareTo(parsedAmount) != 0){
             throw new AppException(ErrorCode.INVALID_PRICE);
         }
 
@@ -123,6 +130,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void updateInvoice(String vnp_TxnRef) {
         Invoice invoiceEntity = invoiceRepository.findByTxnRef(vnp_TxnRef)
                 .orElseThrow(()->new AppException(ErrorCode.INVOICE_NOT_EXISTED));
+
+        // Kiểm tra nếu hóa đơn đã được xử lý trước đó thì không tạo vé nữa
+        if(InvoiceStatus.PAID.toString().equals(invoiceEntity.getStatus())
+                || InvoiceStatus.CHECKED_IN.toString().equals(invoiceEntity.getStatus())){
+            return;
+        }
+
         String bookingCode = RandomCode.generate(12);
         invoiceEntity.setStatus(String.valueOf(InvoiceStatus.PAID));
         invoiceEntity.setBookingCode(bookingCode);

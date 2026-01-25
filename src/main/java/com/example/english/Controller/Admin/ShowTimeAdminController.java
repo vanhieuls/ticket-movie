@@ -75,27 +75,15 @@ public class ShowTimeAdminController {
                 .build();
     }
 
-    @GetMapping("/movie/{movieId}")
+    @GetMapping("/movie")
     @Operation(summary = "Get Show Time List by Movie", description = "API lấy danh sách suất chiếu theo phim, địa chỉ rạp và ngày")
-    public ApiResponse<List<CinemaShowTimeResponse>> getShowTimeListByMovie(@PathVariable Long movieId,
+    public ApiResponse<List<CinemaShowTimeResponse>> getShowTimeListByMovie(@RequestParam Long movieId,
                                                                              @RequestParam("date") LocalDate date,
                                                                              @RequestParam("address") String address) {
         return ApiResponse.<List<CinemaShowTimeResponse>>builder()
                 .code(200)
                 .message("Get show time list by movie successfully")
                 .result(showTimeService.getListShowTimeFilterMovie(movieId, date, address))
-                .build();
-    }
-
-    @GetMapping("/filter")
-    @Operation(summary = "Get Show Time List by Movie and Cinema", description = "API lấy danh sách suất chiếu theo tên phim, tên rạp và ngày")
-    public ApiResponse<List<ShowTimeDto>> getShowTimeDto(@RequestParam("movieName") String movieName,
-                                                          @RequestParam("cinemaName") String cinemaName,
-                                                          @RequestParam("date") LocalDate date) {
-        return ApiResponse.<List<ShowTimeDto>>builder()
-                .code(200)
-                .message("Get show time list by movie and cinema successfully")
-                .result(showTimeService.getShowTimeDto(movieName, cinemaName, date))
                 .build();
     }
 

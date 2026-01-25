@@ -45,15 +45,7 @@ public class CinemaAdminController {
                 .result(cinemaService.updateCinema(id, cinemaRequest))
                 .build();
     }
-    @Operation(summary = "Get Cinemas", description = "API lấy danh sách rạp chiếu phim theo địa chỉ")
-    @GetMapping
-    public ApiResponse<List<CinemaSummaryResponse>> getCinemas(@RequestParam String address) {
-        return ApiResponse.<List<CinemaSummaryResponse>>builder()
-                .code(200)
-                .message("Get cinemas successfully")
-                .result(cinemaService.getCinemas(address))
-                .build();
-    }
+
     @Operation(summary = "Get Cinema", description = "API lấy thông tin chi tiết rạp chiếu phim")
     @GetMapping("/{id}")
     public ApiResponse<CinemaResponse> getCinema(@PathVariable Long id) {
