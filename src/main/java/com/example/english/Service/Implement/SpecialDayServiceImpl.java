@@ -10,6 +10,8 @@ import com.example.english.Service.Interface.SpecialDayService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,5 +58,10 @@ public class SpecialDayServiceImpl implements SpecialDayService {
     @Override
     public List<SpecialDay> getAllSpecialDays() {
         return specialDayRepository.findAll();
+    }
+
+    @Override
+    public Page<SpecialDay> getAllSpecialDays(Pageable pageable) {
+        return specialDayRepository.findAll(pageable);
     }
 }

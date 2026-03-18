@@ -1,6 +1,6 @@
 package com.example.english.Service.Implement;
 
-import com.example.english.Dto.Request.UserRequest;
+import com.example.english.Dto.Request.UserUpdateRequest;
 import com.example.english.Dto.Request.VerifyCodeRequest;
 import com.example.english.Dto.Response.TokenResponse;
 import com.example.english.Dto.Response.TwoFactorResponse;
@@ -13,12 +13,16 @@ import com.example.english.Repository.UserRepository;
 import com.example.english.Security.JwtTokenProvider;
 import com.example.english.Service.Interface.TwoFactorService;
 import com.example.english.Service.Interface.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,8 +49,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse updateUser(UserRequest userRequest) {
-        return null;
+    public UserResponse updateUser(UserUpdateRequest userRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        UserDetails user = (UserDetails) authentication.getPrincipal();
+        assert user != null;
+        String username = user.getUsername();
+        User userEntity = userRepository.findByUsername(username)
+                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
+        userMapper.updateUserFromDto(userRequest, userEntity);
+        userRepository.save(userEntity);
+        return userMapper.toResponse(userEntity);
     }
 
     @Override
@@ -66,9 +79,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllUsers() {
-        return List.of();
+    public Page<UserResponse> getAllUsers(Integer pageNumber, Integer pageSize, String sortBy, String sortDir, String username, String fullName, String email) {
+        Pageable pageable = null;
+        if (pageNumber == null || pageNumber < 0) {
+            pageNumber = 0;
+        }
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = 10;
+        }
+        String sortField = (sortBy != null) ? sortBy : "id";
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        pageable = PageRequest.of(pageNumber, pageSize, Sort.by(direction, sortField ));
+        Specification<User> specification = UserSpecification.filterUser(username, fullName, email);
+        Page<User> userPage = userRepository.findAll(specification, pageable);
+        return userPage.map(userMapper::toResponse);
     }
+
 
     @Override
     public TwoFactorResponse enableTwoFactor() {

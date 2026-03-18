@@ -55,7 +55,16 @@ public class MovieController {
                 .result(movieService.getListCinemaAddress(filterMovie))
                 .build();
     }
-
+//    @PostMapping("/address")
+//    public ApiResponse<List<String>> getListCinemaAddress(@RequestParam Long movieId,
+//                                                          @RequestParam LocalDate date,
+//                                                          @RequestParam(required = false) String address) {
+//        return ApiResponse.<List<String>>builder()
+//                .code(200)
+//                .message("Get cinema address list successfully")
+//                .result(movieService.getListCinemaAddress( movieId, date, address))
+//                .build();
+//    }
     @Operation(summary = "Lấy danh sách phim theo bộ lọc")
     @GetMapping("/filter")
     public Page<MovieSummaryResponse> getFilterMovie(@RequestParam(defaultValue = "0") Integer pageNumber, @RequestParam(defaultValue = "10") Integer pageSize, @RequestParam(required = false) String category, @RequestParam(required = false) String brand,

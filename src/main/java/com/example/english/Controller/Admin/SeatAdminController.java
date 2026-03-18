@@ -32,7 +32,7 @@ public class SeatAdminController {
                 .build();
     }
 
-    @GetMapping("/screen-room/{screenRoomId}")
+    @GetMapping("/screenroom/{screenRoomId}")
     @Operation(summary = "Get Seats by Screen Room", description = "API lấy danh sách ghế theo phòng chiếu")
     public ApiResponse<List<SeatSummaryRepo>> getSeatListByScreenRoom(@PathVariable Long screenRoomId) {
         return ApiResponse.<List<SeatSummaryRepo>>builder()

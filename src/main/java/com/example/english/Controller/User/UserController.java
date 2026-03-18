@@ -1,5 +1,6 @@
 package com.example.english.Controller.User;
 
+import com.example.english.Dto.Request.UserUpdateRequest;
 import com.example.english.Dto.Request.VerifyCodeRequest;
 import com.example.english.Dto.Response.ApiResponse;
 import com.example.english.Dto.Response.TokenResponse;
@@ -57,6 +58,18 @@ public class UserController {
         return ApiResponse.<UserResponse>builder()
                 .code(200)
                 .message("User info retrieved")
+                .result(userResponse)
+                .build();
+    }
+    @Operation(
+            summary = "Cập nhật thông tin người dùng hiện tại"
+    )
+    @PutMapping
+    public ApiResponse<UserResponse> updateUser(@RequestBody UserUpdateRequest userRequest) {
+        UserResponse userResponse = userService.updateUser(userRequest);
+        return ApiResponse.<UserResponse>builder()
+                .code(200)
+                .message("User updated successfully")
                 .result(userResponse)
                 .build();
     }

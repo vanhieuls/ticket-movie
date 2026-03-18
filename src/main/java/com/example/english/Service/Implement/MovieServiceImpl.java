@@ -200,6 +200,29 @@ public class MovieServiceImpl implements MovieService {
         }
         return new ArrayList<>(cinemaAddressList);
     }
+
+    @Override
+    public List<String> getListCinemaAddress(Long movieId, LocalDate date, String address) {
+        if(!movieRepository.existsById(movieId)) {
+            throw new AppException(ErrorCode.MOVIE_NOT_FOUND);
+        }
+        LocalTime currentTime = date.equals(LocalDate.now())
+                ? LocalTime.now().minusMinutes(20)
+                : LocalTime.MIDNIGHT;
+
+        List<ShowTime> showTimeEntityList = showTimeRepository.findByMovie_IdAndShowDateAndStartTimeAfterAndStatusTrue(
+                movieId,
+                date,
+                currentTime
+        );
+        Set<String> cinemaAddressList = new HashSet<>();
+        for(ShowTime st : showTimeEntityList){
+            String addresss = st.getScreenRoom().getCinema().getAddress();
+            cinemaAddressList.add(addresss);
+        }
+        return new ArrayList<>(cinemaAddressList);
+    }
+
     public String getStatus(Movie movieEntity) {
         if(movieEntity.getReleaseDate().isAfter(LocalDate.now())){
             return "Sắp chiếu";

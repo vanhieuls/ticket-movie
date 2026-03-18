@@ -21,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,9 +52,14 @@ public class InvoiceServiceImpl implements InvoiceService {
     TicketRepository ticketRepository;
     private User getUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
+//        Nếu điều kiện sai và JVM bật assertions (-ea), nó sẽ ném AssertionError.
+//         Nếu JVM không bật assertions (đa số production, Spring Boot chạy bình thường), thì hai dòng assert bị bỏ qua hoàn toàn như không tồn tại.
+//        assert authentication != null;
+        if (!authentication.isAuthenticated() || authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED_ACCESS); // hoặc UNAUTHORIZED
+        }
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        assert userDetails != null;
+//        assert userDetails != null;
         return userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
@@ -168,6 +175,24 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceResponseList;
     }
 
+    @Override
+    public Page<InvoiceResponse> getInvoiceList(Pageable pageable) {
+        User user = getUser();
+        Page<Invoice> invoiceEntityPage = invoiceRepository.findByUser_Id(user.getId(), pageable);
+        return invoiceEntityPage.map(invoiceEntity -> {
+            Ticket ticketEntity = getTicket(invoiceEntity.getId());
+            int totalTicket = ticketRepository.countByInvoice_Id(invoiceEntity.getId());
+            return InvoiceResponse.builder()
+                    .invoiceId(invoiceEntity.getId())
+                    .totalMoney(invoiceEntity.getTotalAmount())
+                    .movieName(ticketEntity.getShowTime().getMovie().getName())
+                    .totalTicket(totalTicket)
+                    .showDate(ticketEntity.getShowTime().getShowDate())
+                    .startTime(ticketEntity.getShowTime().getStartTime())
+                    .build();
+        });
+    }
+
 
     @Override
     public InvoiceDetailResponse getInvoice(Long invoiceId) {
@@ -216,6 +241,27 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceSummaryList;
     }
 
+    @Override
+    public Page<InvoiceSummary> getInvoiceSummaryList(Pageable pageable) {
+        Page<Invoice> invoiceEntityPage = invoiceRepository.findAll(pageable);
+        return invoiceEntityPage.map(invoiceEntity -> {
+            Ticket ticketEntity = getTicket(invoiceEntity.getId());
+            String showtime = ticketEntity.getShowTime().getStartTime().toString() + "-" +
+                    ticketEntity.getShowTime().getEndTime().toString() + " " +
+                    ticketEntity.getShowTime().getShowDate().toString();
+            String screenRoom = ticketEntity.getShowTime().getScreenRoom().getName() + " - " +
+                    ticketEntity.getShowTime().getScreenRoom().getCinema().getName();
+            return InvoiceSummary.builder()
+                    .id(invoiceEntity.getId())
+                    .code(invoiceEntity.getBookingCode())
+                    .movieName(ticketEntity.getShowTime().getMovie().getName())
+                    .showTime(showtime)
+                    .screenRoom(screenRoom)
+                    .totalMoney(invoiceEntity.getTotalAmount())
+                    .createDate(invoiceEntity.getCreatedDate().toString())
+                    .build();
+        });
+    }
     @Override
     public InvoiceDetailAD getInvoiceDetail(Long id) {
         Invoice invoiceEntity = invoiceRepository.findById(id)

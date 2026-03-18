@@ -10,9 +10,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
@@ -26,7 +31,7 @@ public class InvoiceAdminController {
     InvoiceService invoiceService;
 
     @Operation(summary = "Get Invoice Summary List", description = "API lấy danh sách tóm tắt hóa đơn")
-    @GetMapping("/invoices")
+    @GetMapping
     public ApiResponse<List<InvoiceSummary>> getInvoiceSummaryList() {
         return ApiResponse.<List<InvoiceSummary>>builder()
                 .code(200)
@@ -35,7 +40,23 @@ public class InvoiceAdminController {
                 .build();
     }
 
-    @GetMapping("/invoices/{id}")
+    @Operation(summary = "Get Invoice Summary List with Pagination", description = "API lấy danh sách tóm tắt hóa đơn có phân trang")
+    @GetMapping("/page")
+    public ApiResponse<Page<InvoiceSummary>> getInvoiceSummaryList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        return ApiResponse.<Page<InvoiceSummary>>builder()
+                .code(200)
+                .message("Get invoice summary list with pagination successfully")
+                .result(invoiceService.getInvoiceSummaryList(pageable))
+                .build();
+    }
+
+    @GetMapping("/{id}")
     @Operation(summary = "Get Invoice Detail", description = "API lấy chi tiết hóa đơn)")
     public ApiResponse<InvoiceDetailAD> getInvoiceDetail(@PathVariable Long id) {
         return ApiResponse.<InvoiceDetailAD>builder()

@@ -2,9 +2,11 @@ package com.example.english.Configuration;
 
 import com.cloudinary.Cloudinary;
 import com.example.english.Entity.CinemaType;
+import com.example.english.Entity.User;
 import com.example.english.Enum.SeatType;
 import com.example.english.Repository.CinemaTypeRepository;
 import com.example.english.Repository.SeatTypeRepository;
+import com.example.english.Repository.UserRepository;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -31,8 +34,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Configuration
 public class CommonConfig implements WebMvcConfigurer{
+    PasswordEncoder passwordEncoder;
     CinemaTypeRepository cinemaTypeRepository;
     SeatTypeRepository seatTypeRepository;
+    UserRepository userRepository;
     @Bean
     public OpenAPI openAPI(
             @Value("${open.api.service.title}") String title,
@@ -91,27 +96,32 @@ public class CommonConfig implements WebMvcConfigurer{
     @Bean
     ApplicationRunner applicationRunner() {
         return args -> {
-            for (com.example.english.Enum.CinemaType type : com.example.english.Enum.CinemaType.values()) {
-                cinemaTypeRepository.findByName(type.getName())
-                .orElseGet(() -> cinemaTypeRepository.save(
-                            CinemaType.builder()
-                                    .name(type.getName())
-                                    .priceFactor(type.getPriceFactor())
-                                    .build()
-                    )
-                );
-            }
-
-            for(SeatType seatType : SeatType.values()){
-                seatTypeRepository.findByName(seatType.getName())
-                        .orElseGet(() -> seatTypeRepository.save(
-                                com.example.english.Entity.SeatType.builder()
-                                        .name(seatType.getName())
-                                         .priceFactor(seatType.getPriceFactor())
-                                        .build()
-                        )
-                );
-            }
+//            for (com.example.english.Enum.CinemaType type : com.example.english.Enum.CinemaType.values()) {
+//                cinemaTypeRepository.findByName(type.getName())
+//                .orElseGet(() -> cinemaTypeRepository.save(
+//                            CinemaType.builder()
+//                                    .name(type.getName())
+//                                    .priceFactor(type.getPriceFactor())
+//                                    .build()
+//                    )
+//                );
+//            }
+//
+//            for(SeatType seatType : SeatType.values()){
+//                seatTypeRepository.findByName(seatType.getName())
+//                        .orElseGet(() -> seatTypeRepository.save(
+//                                com.example.english.Entity.SeatType.builder()
+//                                        .name(seatType.getName())
+//                                         .priceFactor(seatType.getPriceFactor())
+//                                        .build()
+//                        )
+//                );
+//            }
+            User adminUser = User.builder()
+                    .username("admin")
+                    .password(passwordEncoder.encode("Admin@123"))
+                    .build();
+            userRepository.save(adminUser);
         };
     }
 }

@@ -10,6 +10,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -70,6 +74,22 @@ public class SpecialDayAdminController {
                 .code(200)
                 .message("Get all special days successfully")
                 .result(specialDayService.getAllSpecialDays())
+                .build();
+    }
+
+    @GetMapping("/special-days/page")
+    @Operation(summary = "Get All Special Days with Pagination", description = "API lấy tất cả ngày đặc biệt có phân trang")
+    public ApiResponse<Page<SpecialDay>> getAllSpecialDays(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection) {
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        return ApiResponse.<Page<SpecialDay>>builder()
+                .code(200)
+                .message("Get all special days with pagination successfully")
+                .result(specialDayService.getAllSpecialDays(pageable))
                 .build();
     }
 }

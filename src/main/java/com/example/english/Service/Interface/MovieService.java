@@ -23,8 +23,10 @@ public interface MovieService {
     List<MovieSummaryResponse> getNowPlayingMovies();
     List<MovieSummaryResponse> getUpcomingMovies();
     List<String> getListCinemaAddress(FilterMovie filterMovie);
+    List<String> getListCinemaAddress(Long movieId, LocalDate date, String address);
     Page<MovieSummaryResponse> getFilterMovie (Integer pageNumber, Integer pageSize,String category, String brand, String properties,String sortDir,
                                        BigDecimal minPrice,
                                        BigDecimal maxPrice);
     List<MovieResponse> getMovieShowDay(LocalDate date);
+
 }

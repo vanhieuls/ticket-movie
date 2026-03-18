@@ -12,6 +12,8 @@ import com.example.english.Service.Interface.TicketPriceService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -134,5 +136,11 @@ public class TicketPriceServiceImpl implements TicketPriceService {
     public List<TicketPriceResponse> getAllTicketPrice() {
         List<TicketPrice> ticketPrice =  ticketPriceRepository.findAll();
         return ticketPriceMapper.toTicketPriceResponses(ticketPrice);
+    }
+
+    @Override
+    public Page<TicketPriceResponse> getAllTicketPrices(Pageable pageable) {
+        Page<TicketPrice> ticketPricePage = ticketPriceRepository.findAll(pageable);
+        return ticketPricePage.map(ticketPriceMapper::toTicketPriceResponse);
     }
 }

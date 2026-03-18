@@ -12,6 +12,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -51,9 +55,21 @@ public class ScreenRoomTypeServiceImpl implements ScreenRoomTypeService {
     }
 
     @Override
-    public List<ScreenRoomTypeResponse> getAllScreenRoomType() {
-        List<ScreenRoomType> screenRoomTypes = screenRoomTypeRepository.findAll();
-        return screenRoomTypeMapper.toScreenRoomTypeResponseList(screenRoomTypes);
+    public Page<ScreenRoomTypeResponse> getAllScreenRoomType(Integer pageNumber, Integer sizeNumber, String sortBy, String sortDir, Boolean status) {
+        Pageable pageable= null;
+        if (pageNumber == null || pageNumber < 0) pageNumber = 0;
+        if (sizeNumber == null || sizeNumber <= 0) sizeNumber = 10;
+        String sortField = (sortBy != null) ? sortBy : "id";
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        pageable = PageRequest.of(pageNumber, sizeNumber, Sort.by(direction, sortField));
+//        Page<ScreenRoomType> screenRoomTypes = screenRoomTypeRepository.findAll(pageable);
+        Page<ScreenRoomType> screenRoomTypes;
+        if (status == null) {
+            screenRoomTypes = screenRoomTypeRepository.findAll(pageable);
+        } else {
+            screenRoomTypes = screenRoomTypeRepository.findByStatus(status, pageable);
+        }
+        return screenRoomTypes.map(screenRoomTypeMapper::toScreenRoomTypeResponse);
     }
 
     @Override

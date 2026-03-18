@@ -11,6 +11,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -40,6 +44,22 @@ public class InvoiceController {
                 .code(200)
                 .message("Get invoice list successfully")
                 .result(invoiceService.getInvoiceList())
+                .build();
+    }
+
+    @GetMapping("/list/page")
+    @Operation(summary = "Get Invoice List with Pagination", description = "API lấy danh sách hóa đơn của người dùng có phân trang")
+    public ApiResponse<Page<InvoiceResponse>> getInvoiceList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        return ApiResponse.<Page<InvoiceResponse>>builder()
+                .code(200)
+                .message("Get invoice list with pagination successfully")
+                .result(invoiceService.getInvoiceList(pageable))
                 .build();
     }
 

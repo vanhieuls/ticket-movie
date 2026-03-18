@@ -49,7 +49,7 @@ public class ScreenRoomAdminController {
                 .build();
     }
 
-    @GetMapping("/{cinemaId}")
+    @GetMapping("/cinema/{cinemaId}")
     @Operation(summary = "Get Screen Room List", description = "API lấy danh sách phòng chiếu theo rạp")
     public ApiResponse<List<ScreenRoomDetailResponse>> getScreenRoomList(@PathVariable Long cinemaId) {
         return ApiResponse.<List<ScreenRoomDetailResponse>>builder()

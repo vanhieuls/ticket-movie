@@ -11,6 +11,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -60,13 +64,29 @@ public class TicketPriceAdminController {
                 .build();
     }
 
-    @GetMapping("/ticket-prices")
+    @GetMapping
     @Operation(summary = "Get All Ticket Prices", description = "API lấy tất cả giá vé")
     public ApiResponse<List<TicketPriceResponse>> getAllTicketPrices() {
         return ApiResponse.<List<TicketPriceResponse>>builder()
                 .code(200)
                 .message("Get all ticket prices successfully")
                 .result(ticketPriceService.getAllTicketPrice())
+                .build();
+    }
+
+    @GetMapping("/ticket-prices/page")
+    @Operation(summary = "Get All Ticket Prices with Pagination", description = "API lấy tất cả giá vé có phân trang")
+    public ApiResponse<Page<TicketPriceResponse>> getAllTicketPrices(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection) {
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        return ApiResponse.<Page<TicketPriceResponse>>builder()
+                .code(200)
+                .message("Get all ticket prices with pagination successfully")
+                .result(ticketPriceService.getAllTicketPrices(pageable))
                 .build();
     }
 }

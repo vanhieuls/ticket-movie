@@ -3,9 +3,6 @@ package com.example.english.Controller.Admin;
 import com.example.english.Dto.Request.ScreenRoomTypeRequest;
 import com.example.english.Dto.Response.ApiResponse;
 import com.example.english.Dto.Response.ScreenRoomTypeResponse;
-import com.example.english.Entity.ScreenRoomType;
-import com.example.english.Exception.AppException;
-import com.example.english.Exception.ErrorCode;
 import com.example.english.Service.Interface.ScreenRoomTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,9 +10,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/admin/screenRoomType")
@@ -56,12 +52,16 @@ public class ScreenRoomTypeAdminController {
                 .build();
     }
 
-    @GetMapping("/screen-room-types")
-    public ApiResponse<List<ScreenRoomTypeResponse>> getAllScreenRoomType() {
-        return ApiResponse.<List<ScreenRoomTypeResponse>>builder()
+    @GetMapping
+    public ApiResponse<Page<ScreenRoomTypeResponse>> getAllScreenRoomType(@RequestParam(required = false) Boolean status,
+                                                                          @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
+                                                                          @RequestParam(required = false, defaultValue = "10") Integer sizeNumber,
+                                                                          @RequestParam(required = false, defaultValue = "id") String sortBy,
+                                                                          @RequestParam(required = false, defaultValue = "desc") String sortDir) {
+        return ApiResponse.<Page<ScreenRoomTypeResponse>>builder()
                 .code(200)
                 .message("Get all screen room types successfully")
-                .result(screenRoomTypeService.getAllScreenRoomType())
+                .result(screenRoomTypeService.getAllScreenRoomType(pageNumber, sizeNumber, sortBy, sortDir, status))
                 .build();
     }
 

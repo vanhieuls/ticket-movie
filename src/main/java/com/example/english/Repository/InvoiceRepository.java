@@ -1,6 +1,8 @@
 package com.example.english.Repository;
 
 import com.example.english.Entity.Invoice;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,7 @@ import java.util.Optional;
 public interface InvoiceRepository extends JpaRepository<Invoice,Long> {
     Optional<Invoice> findByTxnRef(String txnRef);
     List<Invoice> findByUser_Id(Long userId);
+    Page<Invoice> findByUser_Id(Long userId, Pageable pageable);
     List<Invoice> findByCreatedDateBetween(LocalDate startDate, LocalDate endDate);
     Optional<Invoice> findByBookingCode(String bookingCode);
     @Query("""

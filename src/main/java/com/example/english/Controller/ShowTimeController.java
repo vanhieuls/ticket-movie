@@ -2,6 +2,7 @@ package com.example.english.Controller;
 
 import com.example.english.Dto.Response.ApiResponse;
 import com.example.english.Dto.Response.CinemaShowTimeResponse;
+import com.example.english.Dto.Response.MovieShowTimeResponse;
 import com.example.english.Dto.Response.ShowTimeDto;
 import com.example.english.Service.Interface.ShowTimeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,6 +45,16 @@ public class ShowTimeController {
                 .code(200)
                 .message("Get show time list by movie successfully")
                 .result(showTimeService.getListShowTimeFilterMovie(movieId, date, address))
+                .build();
+    }
+    @GetMapping("/cinema")
+    @Operation(summary = "Get Show Time List by Cinema", description = "API lấy danh sách suất chiếu theo rạp và ngày")
+    public ApiResponse<List<MovieShowTimeResponse>> getShowTimeListByCinema(@RequestParam Long cinema_id,
+                                                                            @RequestParam("date") LocalDate date) {
+        return ApiResponse.<List<MovieShowTimeResponse>>builder()
+                .code(200)
+                .message("Get show time list by cinema successfully")
+                .result(showTimeService.getListShowTimeFilterCinema(cinema_id, date))
                 .build();
     }
 

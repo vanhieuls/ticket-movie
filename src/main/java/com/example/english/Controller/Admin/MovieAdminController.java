@@ -2,6 +2,7 @@ package com.example.english.Controller.Admin;
 import com.example.english.Dto.Request.MovieRequest;
 import com.example.english.Dto.Response.ApiResponse;
 import com.example.english.Dto.Response.MovieDetailResponse;
+import com.example.english.Dto.Response.MovieSummaryResponse;
 import com.example.english.Service.Interface.MovieService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -72,6 +74,17 @@ public class MovieAdminController {
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Cập nhật trạng thái hoạt động của phim thành công")
+                .build();
+    }
+
+    @Operation(summary = "Lấy danh sách tất cả phim có phân trang cho admin")
+    @GetMapping
+    public ApiResponse<Page<MovieSummaryResponse>> getAllMoviesAdmin(@RequestParam(required = false, defaultValue = "0") Integer pageNumber,
+                                                                     @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
+        return ApiResponse.<Page<MovieSummaryResponse>>builder()
+                .code(200)
+                .message("Lấy danh sách phim thành công")
+                .result(movieService.getAllMovies(pageNumber, pageSize))
                 .build();
     }
 
