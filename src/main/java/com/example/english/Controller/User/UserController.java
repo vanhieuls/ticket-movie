@@ -13,13 +13,16 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "User Controller", description = "APIs cho nguời dùng kèm tính năng bật và xác thực 2FA")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@PreAuthorize("hasRole('USER')")
 public class UserController {
     UserService userService;
 

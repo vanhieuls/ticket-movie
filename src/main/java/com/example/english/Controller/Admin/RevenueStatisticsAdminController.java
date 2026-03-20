@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -23,6 +25,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 @Tag(name = "Revenue Statistics Admin Controller", description = "APIs thống kê doanh thu cho admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class RevenueStatisticsAdminController {
     RevenueStatisticsService revenueStatisticsService;
 

@@ -1,5 +1,6 @@
 package com.example.english.Security;
 
+import com.example.english.Configuration.OAuth2Config;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -32,8 +35,9 @@ public class SecurityConfig {
     UserDetailsService customUserDetailsService;
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     JwtAuthenticationFilter jwtAuthenticationFilter;
+    OAuth2Config oAuth2Config;
     String [] PUBLIC_ENDPOINT={"/users/**","/auth/verify-user","/auth/sign-up","/auth/resend-verification",
-            "/auth/sign-in","/auth/forgot-password","/auth/reset-password","/chatbot/chat"};
+            "/auth/sign-in","/auth/forgot-password","/auth/reset-password","/chatbot/chat","/oauth2/**"};
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
@@ -54,6 +58,16 @@ public class SecurityConfig {
     }
 
     @Bean
+    public RoleHierarchy roleHierarchy() {
+        // Define role hierarchy: ADMIN > STAFF > USER
+        // ADMIN inherits all permissions from STAFF, STAFF inherits all permissions from USER
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("ADMIN").implies("STAFF")
+                .role("STAFF").implies("USER")
+                .build();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
         httpSecurity.authorizeHttpRequests(o->o.requestMatchers(HttpMethod.POST,PUBLIC_ENDPOINT).permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT).permitAll()
@@ -61,11 +75,17 @@ public class SecurityConfig {
                         "/v3/api-docs/**").permitAll()
                 .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINT).permitAll()
                 .requestMatchers(HttpMethod.PUT, PUBLIC_ENDPOINT).permitAll()
-                .anyRequest().permitAll());
+                // Public read-only endpoints for movies, cinemas, showtimes, seats
+                .requestMatchers(HttpMethod.GET, "/movie/**", "/cinema/**", "/showtime/**", "/seat/**").permitAll()
+                // VNPay IPN callback (called by VNPay server, not by user)
+                .requestMatchers(HttpMethod.GET, "/vnpay/IPN").permitAll()
+                .anyRequest().authenticated()); // All other requests require authentication
 //        httpSecurity.oauth2Client(Customizer.withDefaults());
         httpSecurity.cors(Customizer.withDefaults()); //Quan trong (Bật cors)
         httpSecurity.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.oauth2Client(Customizer.withDefaults());
+        httpSecurity.oauth2Login(oauth2 -> oauth2.successHandler(oAuth2Config));
         httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         httpSecurity.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
         return httpSecurity.build();

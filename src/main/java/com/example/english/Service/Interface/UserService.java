@@ -19,4 +19,6 @@ public interface UserService {
     Page<UserResponse> getAllUsers(Integer pageNumber, Integer pageSize, String sortBy, String sortDir, String username, String fullName, String email);
     TwoFactorResponse enableTwoFactor();
     TokenResponse verifyCode(String tempToken, VerifyCodeRequest verifyCodeRequest);
+    UserResponse assignRoleToUser(Long userId, String roleName);
+    UserResponse removeRoleFromUser(Long userId, String roleName);
 }

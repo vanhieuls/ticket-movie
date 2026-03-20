@@ -67,7 +67,11 @@ public enum ErrorCode {
     ORDER_CREATE_FAILED(11001,"Order creation failed", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_PRICE(11002,"Invalid price", HttpStatus.BAD_REQUEST),
         ///invoice////
-    INVOICE_NOT_EXISTED(12001,"Invoice does not exist", HttpStatus.NOT_FOUND)
+    INVOICE_NOT_EXISTED(12001,"Invoice does not exist", HttpStatus.NOT_FOUND),
+    ////////Role/////////
+    ROLE_EXISTED(13001,"Role already exists", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_FOUND(13002,"Role not found", HttpStatus.NOT_FOUND),
+    UNCATEGORIZED_EXCEPTION(9999,"An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR)
     ;
     int code;
     String message;

@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.util.List;
 
 @RestController
@@ -24,6 +26,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @Tag(name = "Cinema Admin Controller", description = "APIs quản lý rạp chiếu phim cho admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class CinemaAdminController {
     CinemaService cinemaService;
     @Operation(summary = "Create Cinema", description = "API tạo mới rạp chiếu phim")

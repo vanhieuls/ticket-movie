@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -19,6 +20,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/admin/seat")
 @Tag(name = "Seat Admin Controller", description = "APIs quản lý ghế cho admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class SeatAdminController {
     SeatService seatService;
 

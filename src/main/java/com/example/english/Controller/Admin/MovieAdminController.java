@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/admin/movies")
 @Tag(name = "Movie Admin Controller", description = "APIs quản lý phim cho admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class MovieAdminController {
     MovieService movieService;
 

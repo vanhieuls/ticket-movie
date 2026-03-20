@@ -16,6 +16,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 @Tag(name = "Screen Room Admin Controller", description = "APIs quản lý phòng chiếu cho admin")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class ScreenRoomAdminController {
     ScreenRoomService screenRoomService;
 

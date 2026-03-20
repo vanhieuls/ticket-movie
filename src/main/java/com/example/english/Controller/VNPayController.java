@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 public class VNPayController {
     private static final Logger log = LoggerFactory.getLogger(VNPayController.class);
     VNPayService vnpayService;
+
     @PostMapping("/payment")
+    @PreAuthorize("hasRole('USER')")
     public ApiResponse<CheckOutResponse> createPayment(@Valid @RequestBody PaymentDto paymentDto) {
         String paymentUrl = vnpayService.createPayment(paymentDto);
         return ApiResponse.<CheckOutResponse>builder()

@@ -5,10 +5,12 @@ import com.example.english.Dto.Request.VerifyCodeRequest;
 import com.example.english.Dto.Response.TokenResponse;
 import com.example.english.Dto.Response.TwoFactorResponse;
 import com.example.english.Dto.Response.UserResponse;
+import com.example.english.Entity.Role;
 import com.example.english.Entity.User;
 import com.example.english.Exception.AppException;
 import com.example.english.Exception.ErrorCode;
 import com.example.english.Mapper.UserMapper;
+import com.example.english.Repository.RoleRepository;
 import com.example.english.Repository.UserRepository;
 import com.example.english.Security.JwtTokenProvider;
 import com.example.english.Service.Interface.TwoFactorService;
@@ -39,6 +41,7 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     UserRepository userRepository;
+    RoleRepository roleRepository;
     TwoFactorService twoFactorService;
     JwtTokenProvider jwtTokenProvider;
     UserMapper userMapper;
@@ -149,5 +152,29 @@ public class UserServiceImpl implements UserService {
         else {
             throw new AppException(ErrorCode.INVALID_2FA_CODE);
         }
+    }
+
+    @Override
+    public UserResponse assignRoleToUser(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Role role = roleRepository.findById(roleName)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+
+        user.getRoles().add(role);
+        User savedUser = userRepository.save(user);
+        return userMapper.toResponse(savedUser);
+    }
+
+    @Override
+    public UserResponse removeRoleFromUser(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Role role = roleRepository.findById(roleName)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+
+        user.getRoles().remove(role);
+        User savedUser = userRepository.save(user);
+        return userMapper.toResponse(savedUser);
     }
 }

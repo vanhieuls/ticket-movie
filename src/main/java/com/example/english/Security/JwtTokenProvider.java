@@ -12,11 +12,15 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 import static com.example.english.Enum.TypeToken.*;
@@ -62,24 +66,26 @@ public class JwtTokenProvider {
         String username = userDetails.getUsername();
         Date currentDate = new Date();
         Date expireDate = new Date(new Date().getTime() + expireTime);
+        String scope = buildScope(userDetails);
         return Jwts.builder()
                 .setId(UUID.randomUUID().toString()) //id token: Dùng để thu hồi khi cần
                 .setSubject(username)
                 .setIssuedAt(currentDate)
                 .setExpiration(expireDate)
-//                .claim("Role", buildScope(userDetails)) //Vai trò của user
+                .claim("scope", scope) // User roles/authorities
                 .signWith(key(typeToken))
                 .compact();
     }
-//    private String buildScope(UserDetails userDetails) {
-//        StringJoiner stringJoiner = new StringJoiner(" ");
-//        if (!CollectionUtils.isEmpty(userDetails.getAuthorities())) {
-//            userDetails.getAuthorities().forEach(s -> {
-//                stringJoiner.add(s.getAuthority());
-//            });
-//        }
-//        return stringJoiner.toString();
-//    }
+
+    private String buildScope(UserDetails userDetails) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        if (!CollectionUtils.isEmpty(userDetails.getAuthorities())) {
+            userDetails.getAuthorities().forEach(authority -> {
+                stringJoiner.add(authority.getAuthority());
+            });
+        }
+        return stringJoiner.toString();
+    }
 
     private Key key(TypeToken typeKey) {
         if (ACCESS_TOKEN.equals(typeKey)) {
