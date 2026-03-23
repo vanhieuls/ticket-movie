@@ -35,7 +35,7 @@ public class OAuth2Config implements AuthenticationSuccessHandler {
     RoleRepository roleRepository;
 
     @NonFinal
-    @Value("${oauth2.redirect-url:http://localhost:3000/oauth2/redirect}")
+    @Value("${oauth2.frontend-redirect-url:http://localhost:3000/oauth2/redirect}")
     String redirectUrl;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,

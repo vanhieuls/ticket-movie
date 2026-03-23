@@ -37,7 +37,8 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter;
     OAuth2Config oAuth2Config;
     String [] PUBLIC_ENDPOINT={"/users/**","/auth/verify-user","/auth/sign-up","/auth/resend-verification",
-            "/auth/sign-in","/auth/forgot-password","/auth/reset-password","/chatbot/chat","/oauth2/**"};
+            "/auth/sign-in","/auth/forgot-password","/auth/reset-password","/chatbot/chat",
+            "/oauth2/**", "/login/oauth2/**"};
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
