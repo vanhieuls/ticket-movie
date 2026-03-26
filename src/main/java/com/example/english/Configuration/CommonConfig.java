@@ -2,9 +2,12 @@ package com.example.english.Configuration;
 
 import com.cloudinary.Cloudinary;
 import com.example.english.Entity.CinemaType;
+import com.example.english.Entity.Role;
 import com.example.english.Entity.User;
 import com.example.english.Enum.SeatType;
+import com.example.english.Enum.StatusAcc;
 import com.example.english.Repository.CinemaTypeRepository;
+import com.example.english.Repository.RoleRepository;
 import com.example.english.Repository.SeatTypeRepository;
 import com.example.english.Repository.UserRepository;
 import io.swagger.v3.oas.models.Components;
@@ -27,8 +30,10 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -38,6 +43,7 @@ public class CommonConfig implements WebMvcConfigurer{
     CinemaTypeRepository cinemaTypeRepository;
     SeatTypeRepository seatTypeRepository;
     UserRepository userRepository;
+    RoleRepository roleRepository;
     @Bean
     public OpenAPI openAPI(
             @Value("${open.api.service.title}") String title,
@@ -117,11 +123,31 @@ public class CommonConfig implements WebMvcConfigurer{
 //                        )
 //                );
 //            }
-            User adminUser = User.builder()
+                Role adminRole = roleRepository.findById("ADMIN")
+                    .orElseGet(() -> roleRepository.save(
+                        Role.builder()
+                            .name("ADMIN")
+                            .description("Administrator role")
+                            .build()
+                    ));
+
+                if (!userRepository.existsByUsername("admin")) {
+                Set<Role> roles = new HashSet<>();
+                roles.add(adminRole);
+
+                User adminUser = User.builder()
                     .username("admin")
+                    .email("admin@movie-ticket.local")
                     .password(passwordEncoder.encode("Admin@123"))
+                    .firstName("System")
+                    .lastName("Admin")
+                    .status(StatusAcc.ACTIVE)
+                    .nonLocked(true)
+                    .twoFactorEnabled(false)
+                    .roles(roles)
                     .build();
-            userRepository.save(adminUser);
+                userRepository.save(adminUser);
+                }
         };
     }
 }
